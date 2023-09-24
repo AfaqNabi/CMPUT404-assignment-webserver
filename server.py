@@ -42,12 +42,6 @@ class HTTP_RESPONSES(enum.Enum):
     INTERNAL_SERVER_ERROR = "500 Internal Server Error"
 
 
-class HTTP_HEADERS(enum.Enum):
-    CONTENT_TYPE = "Content-Type"
-    CONTENT_LENGTH = "Content-Length"
-    LOCATION = "Location"
-    SERVER = "Simple-Python-HTTP-Server"
-
 # https://stackoverflow.com/questions/6803505/does-my-code-prevent-directory-traversal
 def is_directory_traversal(file_name):
     current_directory = os.path.abspath(os.curdir)
@@ -71,9 +65,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
             print("Redirecting")
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.MOVED_PERMANENTLY, filePath=path))
-            # manually send html ok response
-            self.request.sendall(bytearray("HTTP/1.0 200 OK\r\n", 'utf-8'))
-
         elif os.path.isdir(filePath.rstrip('/')) and not is_directory_traversal(filePath):
             # prevent directory traversal attack
             filePath += "index.html"
