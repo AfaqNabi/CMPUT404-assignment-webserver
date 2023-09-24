@@ -54,7 +54,7 @@ def is_directory_traversal(file_name):
 class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(BYTES_PER_READ).strip()
-        method, path, version = self.parse_request(self.data)
+        method, path = self.parse_request(self.data)
         filePath = BASE_DIR_PATH + path
 
         if method != 'GET':
@@ -66,7 +66,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.MOVED_PERMANENTLY, filePath=path))
         elif os.path.isdir(filePath.rstrip('/')) and not is_directory_traversal(filePath):
-            # prevent directory traversal attack
             filePath += "index.html"
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.OK, open(filePath.rstrip('/'), 'r').read(), filePath.rstrip('/')))
@@ -101,7 +100,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         request_line = self.request_line.strip('\r\n')
         (self.request_method, self.path, self.request_version) = request_line.split()
         print(self.request_method, self.path, self.request_version)
-        return self.request_method, self.path, self.request_version
+        return self.request_method, self.path
 
 
 if __name__ == "__main__":
