@@ -63,7 +63,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.METHOD_NOT_ALLOWED, open('notAllowed.html', 'r').read()))
 
-        if path[-1] != '/':
+        if path[-1] != '/' and not os.path.isfile(filePath.rstrip('/')):
             print("Redirecting")
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.MOVED_PERMANENTLY, filePath=path.rstrip('/')))
