@@ -54,8 +54,10 @@ def is_directory_traversal(file_name):
 class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(BYTES_PER_READ).strip()
+        # print(self.data)
         method, path = self.parse_request(self.data)
         filePath = BASE_DIR_PATH + path
+        # print(path, path.lstrip('/').rstrip('/'))
 
         if method != 'GET':
             self.request.sendall(self.build_response(
@@ -64,12 +66,13 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if path[-1] != '/':
             print("Redirecting")
             self.request.sendall(self.build_response(
-                HTTP_RESPONSES.MOVED_PERMANENTLY, filePath=path))
+                HTTP_RESPONSES.MOVED_PERMANENTLY, filePath=path.rstrip('/')))
         elif os.path.isdir(filePath.rstrip('/')) and not is_directory_traversal(filePath):
             filePath += "index.html"
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.OK, open(filePath.rstrip('/'), 'r').read(), filePath.rstrip('/')))
         elif os.path.isfile(filePath.rstrip('/')) and not is_directory_traversal(filePath):
+            print(filePath, path)
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.OK, open(filePath.rstrip('/'), 'r').read(), filePath.rstrip('/')))
         else:
@@ -83,10 +86,12 @@ class MyWebServer(socketserver.BaseRequestHandler):
             response += "Content-Type: text/html\r\n"
         elif filePath.endswith(".css"):
             response += "Content-Type: text/css\r\n"
+        response += "Connection: close\r\n"
 
         response += "Content-Length: " + str(len(fileData)) + "\r\n"
         if code == HTTP_RESPONSES.MOVED_PERMANENTLY:
-            response += "Location: " + BASE_URL + filePath+"/\r\n"
+            response += "Location: " + BASE_URL + \
+                "/"+filePath.lstrip('/')+"/\r\n"
         response += "\r\n"
         response += fileData
         return bytearray(response, 'utf-8')
