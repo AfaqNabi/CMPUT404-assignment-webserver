@@ -54,10 +54,8 @@ def is_directory_traversal(file_name):
 class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(BYTES_PER_READ).strip()
-        # print(self.data)
         method, path = self.parse_request(self.data)
         filePath = BASE_DIR_PATH + path
-        # print(path, path.lstrip('/').rstrip('/'))
 
         if method != 'GET':
             self.request.sendall(self.build_response(
@@ -72,7 +70,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.OK, open(filePath.rstrip('/'), 'r').read(), filePath.rstrip('/')))
         elif os.path.isfile(filePath.rstrip('/')) and not is_directory_traversal(filePath):
-            print(filePath, path)
             self.request.sendall(self.build_response(
                 HTTP_RESPONSES.OK, open(filePath.rstrip('/'), 'r').read(), filePath.rstrip('/')))
         else:
